@@ -52,7 +52,6 @@ services:
       - traefik.http.routers.livevideo.tls.certresolver=lets-encrypt
       - traefik.http.services.livevideo.loadbalancer.server.port=2022
 ```
-
 ## Step 1.3 Deploy SRS Stack in docker
 
 Run `docker-compose up -d` to deploy the srs-stack.
@@ -94,6 +93,25 @@ ffmpeg -re -rtsp_transport tcp -i rtsp://username:password@c.c.c.c -flvflags no_
 `-rtsp_transport tcp`: Specifies the transport protocol to be used for the RTSP connection. In this case, it's set to TCP, which can be more reliable than UDP in certain network conditions.
 
 `-flvflags no_duration_filesize`: This option is used to set FLV (Flash Video) flags. In this case, it's set to `no_duration_filesize`, which means FFmpeg will not write duration and filesize to the FLV header.
+
+docker-compose for srs-encoder
+```yml
+version: '3'
+
+services:
+  srs_encoder:
+    image: ossrs/srs:encoder
+    container_name: srs-encoder.techplayr.lan
+    restart: always
+
+    command: >
+      ffmpeg -re -rtsp_transport tcp -i rtsp://username:password@c.c.c.c -flvflags no_duration_filesize -c copy -f flv rtmp://livevideo.example.com/live/paemog?secret=743acd8e22af4bc9b5c358e63704e0ba
+
+    stdin_open: true
+
+    tty: true
+```
+
 ### Notes
 
 1. If ffmpeg is segfaulting, use the ubuntu supplied ffmpeg binary (`apt install ffmpeg`) and not the static builds from ffmpeg.org.
